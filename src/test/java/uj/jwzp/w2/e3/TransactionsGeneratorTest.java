@@ -3,31 +3,21 @@ package uj.jwzp.w2.e3;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.InjectMocks;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import uj.jwzp.w2.e3.logic.TransactionsGenerator;
-import uj.jwzp.w2.e3.logic.beans.TransactionGeneratorArgsSource;
 import uj.jwzp.w2.e3.logic.reader.ItemsReader;
-import uj.jwzp.w2.e3.logic.wrappers.FilesystemWrapper;
-import uj.jwzp.w2.e3.logic.writer.BulkFilesWriter;
-import uj.jwzp.w2.e3.logic.writer.TransactionWriter;
 import uj.jwzp.w2.e3.model.Item;
 import uj.jwzp.w2.e3.model.Transaction;
 import uj.jwzp.w2.e3.model.TransactionGeneratorArgs;
 import uj.jwzp.w2.e3.model.property.DateRangeProperty;
 import uj.jwzp.w2.e3.model.property.IntRangeProperty;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.PrintStream;
 import java.math.BigDecimal;
-import java.nio.file.Paths;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
-
-import static org.hamcrest.core.StringContains.containsString;
 
 public class TransactionsGeneratorTest {
     private final static int TRANSACTION_ID = 1;
@@ -42,9 +32,6 @@ public class TransactionsGeneratorTest {
     private final static int EVENTS_COUNT_SINGLE = 1;
     private final static int EVENTS_COUNT_MULTIPLE = 3;
 
-    @InjectMocks
-    private TransactionGeneratorArgsSource argsSource;
-
     @Before
     public void Prepare() {
         MockitoAnnotations.initMocks(this);
@@ -53,20 +40,20 @@ public class TransactionsGeneratorTest {
     @Test
     public void shouldGetSingleRandomTransactionWithDefaultArgs() {
         ItemsReader reader = Mockito.mock(ItemsReader.class);
-        TransactionWriter writer = Mockito.mock(TransactionWriter.class);
 
         Item testItem = Mockito.mock(Item.class);
         List<Item> availableItemsList = new ArrayList<>();
         availableItemsList.add(testItem);
 
-        TransactionGeneratorArgs args = argsSource.getTransactionGeneratorArgs(
+        TransactionGeneratorArgs args = new TransactionGeneratorArgs(
                 new IntRangeProperty(TRANSACTION_CUSTOMER_ID, TRANSACTION_CUSTOMER_ID),
                 new DateRangeProperty(TRANSACTION_DATE, TRANSACTION_DATE),
                 new IntRangeProperty(availableItemsList.size(), availableItemsList.size()),
                 new IntRangeProperty(TRANSACTION_ITEMS_QUANTITY, TRANSACTION_ITEMS_QUANTITY),
                 EVENTS_COUNT_SINGLE );
 
-        TransactionsGenerator uut = new TransactionsGenerator(reader, writer, args);
+        TransactionsGenerator uut = new TransactionsGenerator(reader);
+        uut.prepare(args);
         Transaction result = uut.getSingleRandomTransaction(availableItemsList, TRANSACTION_ID);
 
         Assert.assertEquals(TRANSACTION_ID, result.getId());
@@ -78,7 +65,6 @@ public class TransactionsGeneratorTest {
     @Test
     public void shouldCountSummaryPrice() {
         ItemsReader reader = Mockito.mock(ItemsReader.class);
-        TransactionWriter writer = Mockito.mock(TransactionWriter.class);
 
         Item testItem1 = Mockito.mock(Item.class);
         Item testItem2 = Mockito.mock(Item.class);
@@ -95,7 +81,8 @@ public class TransactionsGeneratorTest {
                 new IntRangeProperty(TRANSACTION_ITEMS_QUANTITY, TRANSACTION_ITEMS_QUANTITY),
                 EVENTS_COUNT_SINGLE );
 
-        TransactionsGenerator uut = new TransactionsGenerator(reader, writer, args);
+        TransactionsGenerator uut = new TransactionsGenerator(reader);
+        uut.prepare(args);
         Transaction result = uut.getSingleRandomTransaction(availableItemsList, TRANSACTION_ID);
 
         Assert.assertEquals(TRANSACTION_SUMMARY, result.getSum());
@@ -104,7 +91,6 @@ public class TransactionsGeneratorTest {
     @Test
     public void shouldGenerateAll() {
         ItemsReader reader = Mockito.mock(ItemsReader.class);
-        TransactionWriter writer = Mockito.mock(TransactionWriter.class);
 
         Item testItem1 = Mockito.mock(Item.class);
         List<Item> availableItemsList = new ArrayList<Item>();
@@ -118,47 +104,15 @@ public class TransactionsGeneratorTest {
                 new IntRangeProperty(TRANSACTION_ITEMS_QUANTITY, TRANSACTION_ITEMS_QUANTITY),
                 EVENTS_COUNT_MULTIPLE );
 
-        TransactionsGenerator uut = new TransactionsGenerator(reader, writer, args);
+        TransactionsGenerator uut = new TransactionsGenerator(reader);
+        uut.prepare(args);
         try {
             Mockito.when(reader.read()).thenReturn(availableItemsList);
-            uut.generate();
-            Mockito.verify(writer, Mockito.times(EVENTS_COUNT_MULTIPLE)).write(Mockito.any());
+            List<Transaction> transactions = uut.generate();
+            Assert.assertEquals(EVENTS_COUNT_MULTIPLE, transactions.size());
         } catch (IOException e) {
             e.printStackTrace();
             Assert.fail();
-        }
-    }
-
-    @Test
-    public void shouldLogAndRethrowWhenFailedWritingTransaction() {
-        PrintStream sysOut = System.out;
-        ByteArrayOutputStream outContent = new ByteArrayOutputStream();
-        System.setOut(new PrintStream(outContent));
-
-        ItemsReader reader = Mockito.mock(ItemsReader.class);
-        TransactionWriter writer = Mockito.mock(TransactionWriter.class);
-
-        Item testItem = Mockito.mock(Item.class);
-        List<Item> availableItemsList = new ArrayList<>();
-        availableItemsList.add(testItem);
-
-        TransactionGeneratorArgs args = new TransactionGeneratorArgs (
-                new IntRangeProperty(TRANSACTION_CUSTOMER_ID, TRANSACTION_CUSTOMER_ID),
-                new DateRangeProperty(TRANSACTION_DATE, TRANSACTION_DATE),
-                new IntRangeProperty(availableItemsList.size(), availableItemsList.size()),
-                new IntRangeProperty(TRANSACTION_ITEMS_QUANTITY, TRANSACTION_ITEMS_QUANTITY),
-                EVENTS_COUNT_SINGLE );
-
-        TransactionsGenerator uut = new TransactionsGenerator(reader, writer, args);
-
-        try {
-            Mockito.when(reader.read()).thenReturn(availableItemsList);
-            Mockito.doThrow(new IOException()).when(writer).write(Mockito.any());
-            uut.generate();
-            Assert.fail();
-        } catch (IOException e) {
-            System.setOut(sysOut);
-            Assert.assertThat(outContent.toString(), containsString("ERROR"));
         }
     }
 }

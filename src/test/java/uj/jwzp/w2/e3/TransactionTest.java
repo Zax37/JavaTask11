@@ -27,13 +27,12 @@ public class TransactionTest {
 
     @Test
     public void shouldGetCorrectSum() {
-        Transaction uut = Transaction.builder()
-                .id(TEST_TRANSACTION_ID)
-                .customerId(TEST_TRANSACTION_CUSTOMER_ID)
-                .timestamp(TEST_TRANSACTION_TIMESTAMP)
-                .itemsOrdered(TEST_TRANSACTION_ITEMS_ORDERED)
-                .build();
-
+        Transaction uut = new Transaction(
+                TEST_TRANSACTION_ID,
+                TEST_TRANSACTION_TIMESTAMP,
+                TEST_TRANSACTION_CUSTOMER_ID,
+                TEST_TRANSACTION_ITEMS_ORDERED
+        );
         Assert.assertEquals(TEST_TRANSACTION_SUM, uut.getSum());
     }
 }
