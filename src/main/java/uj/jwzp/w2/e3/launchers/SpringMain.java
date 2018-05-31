@@ -11,10 +11,7 @@ import uj.jwzp.w2.e3.logic.converter.YamlHttpMessageConverter;
 
 import java.util.List;
 
-@Slf4j
-@Configuration
-@EnableAutoConfiguration
-@ComponentScan(basePackages = "uj.jwzp.w2.e3")
+@SpringBootApplication
 public class SpringMain implements WebMvcConfigurer {
     public static void main(String[] args) {
         SpringApplication.run(SpringMain.class, args);
