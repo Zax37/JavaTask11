@@ -1,6 +1,6 @@
 # Java w zastosowaniach produkcyjnych
 
-## Zadanie 10 - Generator transakcji - Heroku
+## Zadanie 11 - Generator transakcji - Heroku
 
 "Generator transakcji" z poprzednich zajęć należalo udostępnić na heroku oraz:
 
