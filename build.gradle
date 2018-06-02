@@ -1,25 +1,28 @@
+buildscript {
+    ext {
+        springBootVersion = '2.0.2.RELEASE'
+    }
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
+    }
+}
+
 plugins {
     id "java"
-    id "groovy"
     id "jacoco"
     id "maven-publish"
-	id 'application'
     id "io.ratpack.ratpack-groovy" version "1.5.4"
 }
 
+apply plugin: 'org.springframework.boot'
+apply plugin: 'io.spring.dependency-management'
+
 group 'uj.jwzp.w2'
-
 sourceCompatibility = 1.8
-
 mainClassName = "uj.jwzp.w2.e3.launchers.SpringMain"
-
-jar {
-    manifest {
-        attributes("Implementation-Title": project.name,
-            "Main-Class": mainClassName)
-    }
-    from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
-}
 
 repositories {
     mavenCentral()
@@ -69,11 +72,14 @@ dependencies {
     compile 'net.sf.jopt-simple:jopt-simple:6.0-alpha-2'
     compile group: 'org.springframework', name: 'spring-webmvc', version: '5.0.6.RELEASE'
     compile group: "org.springframework.boot", name: "spring-boot-starter-web", version: '2.0.2.RELEASE'
+    compile group: "org.springframework.boot", name: "spring-boot-starter-parent", version: '2.0.2.RELEASE'
     compile ratpack.dependency("hikari")
 }
 
+build.dependsOn(tasks.bootJar)
 build.dependsOn(tasks.jacocoTestReport)
 
 task stage {
+    dependsOn bootJar
     dependsOn installDist
 }
