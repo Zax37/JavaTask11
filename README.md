@@ -2,6 +2,8 @@
 
 ## Zadanie 11 - Generator transakcji - Heroku
 
+[![Build status](https://travis-ci.org/Zax37/JavaTask11.svg?branch=master)](https://travis-ci.org/Zax37/JavaTask11)
+
 "Generator transakcji" z poprzednich zajęć należalo udostępnić na heroku oraz:
 
 - Dostarczyć endpoiont http, który będzie zwracał transakcje w formie tablicy jsonowej, lub listy XMLi, lub listy yamlowej w zależnosci od wartości nagłówka http “Accept” (application/json, application/xml, application/yml).
