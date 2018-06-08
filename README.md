@@ -3,6 +3,7 @@
 ## Zadanie 11 - Generator transakcji - Heroku
 
 [![Build status](https://travis-ci.org/Zax37/JavaTask11.svg?branch=master)](https://travis-ci.org/Zax37/JavaTask11)
+[![Heroku](http://heroku-badges.herokuapp.com/?app=heroku-badges&transactions)](https://murmuring-temple-13009.herokuapp.com/transactions?customersId=1:2&dateRange=2018-03-08T00:00:00.000-0100:2018-03-08T23:59:59.999-0100&itemsCount=1:2&itemsQuantity=1:2&eventsCount=10)
 
 "Generator transakcji" z poprzednich zajęć należalo udostępnić na heroku oraz:
 
